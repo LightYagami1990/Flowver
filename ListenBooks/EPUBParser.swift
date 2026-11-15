@@ -2,6 +2,30 @@ import Foundation
 import Fuzi
 import Zip
 
+/// EPUB 解析错误类型
+enum EPUBError: Error, LocalizedError {
+    case fileNotFound
+    case unzipFailed(Error)
+    case invalidStructure(String)
+    case noChaptersFound
+    case encodingFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .fileNotFound:
+            return "EPUB 文件不存在"
+        case .unzipFailed(let error):
+            return "解压 EPUB 失败：\(error.localizedDescription)"
+        case .invalidStructure(let detail):
+            return "EPUB 结构无效：\(detail)"
+        case .noChaptersFound:
+            return "未解析到任何章节"
+        case .encodingFailed:
+            return "文件编码读取失败"
+        }
+    }
+}
+
 /// EPUB 解析器
 /// 功能：解压 EPUB、读取 container.xml / OPF、按 spine 顺序提取章节纯文本并切分句子
 enum EPUBParser {
@@ -11,25 +35,66 @@ enum EPUBParser {
     /// - Parameter epubURL: EPUB 文件路径
     /// - Returns: Book
     func parse(epubURL: URL) throws -> Book {
+        guard FileManager.default.fileExists(atPath: epubURL.path) else {
+            throw EPUBError.fileNotFound
+        }
+
         // 1. 解压到缓存目录
         let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let bookFolder = cacheDir.appendingPathComponent(epubURL.deletingPathExtension().lastPathComponent)
+        let safeName = epubURL.deletingPathExtension().lastPathComponent
+            .replacingOccurrences(of: " ", with: "_")
+        let bookFolder = cacheDir.appendingPathComponent(safeName)
         try? FileManager.default.removeItem(at: bookFolder)
         try FileManager.default.createDirectory(at: bookFolder, withIntermediateDirectories: true)
 
-        try Zip.unzipFile(epubURL, destination: bookFolder, overwrite: true, password: nil)
+        do {
+            try Zip.unzipFile(epubURL, destination: bookFolder, overwrite: true, password: nil)
+        } catch {
+            throw EPUBError.unzipFailed(error)
+        }
 
         // 2. 读取 META-INF/container.xml，找到 OPF 路径
         let containerURL = bookFolder.appendingPathComponent("META-INF/container.xml")
-        let containerData = try Data(contentsOf: containerURL)
-        let containerDoc = try XMLDocument(data: containerData)
+        guard FileManager.default.fileExists(atPath: containerURL.path) else {
+            throw EPUBError.invalidStructure("未找到 META-INF/container.xml")
+        }
+
+        let containerData: Data
+        do {
+            containerData = try Data(contentsOf: containerURL)
+        } catch {
+            throw EPUBError.encodingFailed
+        }
+
+        let containerDoc: XMLDocument
+        do {
+            containerDoc = try XMLDocument(data: containerData)
+        } catch {
+            throw EPUBError.invalidStructure("container.xml 解析失败")
+        }
+
         guard let rootfile = containerDoc.css("rootfile").first?.attr("full-path") else {
             throw EPUBError.invalidStructure("未找到 rootfile")
         }
 
         let opfURL = bookFolder.appendingPathComponent(rootfile)
-        let opfData = try Data(contentsOf: opfURL)
-        let opfDoc = try XMLDocument(data: opfData)
+        guard FileManager.default.fileExists(atPath: opfURL.path) else {
+            throw EPUBError.invalidStructure("OPF 文件不存在：\(rootfile)")
+        }
+
+        let opfData: Data
+        do {
+            opfData = try Data(contentsOf: opfURL)
+        } catch {
+            throw EPUBError.encodingFailed
+        }
+
+        let opfDoc: XMLDocument
+        do {
+            opfDoc = try XMLDocument(data: opfData)
+        } catch {
+            throw EPUBError.invalidStructure("OPF 解析失败")
+        }
 
         // 基础目录（OPF 所在目录，用于解析相对路径）
         let baseURL = opfURL.deletingLastPathComponent()
@@ -63,8 +128,20 @@ enum EPUBParser {
             let chapterURL = baseURL.appendingPathComponent(relativePath)
             guard FileManager.default.fileExists(atPath: chapterURL.path) else { continue }
 
-            let htmlData = try Data(contentsOf: chapterURL)
-            let htmlDoc = try HTMLDocument(data: htmlData)
+            let htmlData: Data
+            do {
+                htmlData = try Data(contentsOf: chapterURL)
+            } catch {
+                continue
+            }
+
+            let htmlDoc: HTMLDocument
+            do {
+                htmlDoc = try HTMLDocument(data: htmlData)
+            } catch {
+                continue
+            }
+
             // 去掉 script / style
             for node in htmlDoc.css("script, style") {
                 node.removeFromParent()
@@ -80,7 +157,7 @@ enum EPUBParser {
         }
 
         guard !chapters.isEmpty else {
-            throw EPUBError.invalidStructure("未解析到任何章节")
+            throw EPUBError.noChaptersFound
         }
 
         return Book(
@@ -101,7 +178,12 @@ enum EPUBParser {
 
         // 切分正则：中英文句号、问号、感叹号、分号、换行等
         let pattern = #"([。！！？？\.!?;；\n\r]+)"#
-        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+        let regex: NSRegularExpression
+        do {
+            regex = try NSRegularExpression(pattern: pattern, options: [])
+        } catch {
+            return [cleaned]
+        }
         let range = NSRange(cleaned.startIndex..<cleaned.endIndex, in: cleaned)
         let parts = regex.components(separatedBy: cleaned, options: [], range: range)
 
@@ -128,8 +210,4 @@ enum EPUBParser {
         let filtered = sentences.filter { $0.count >= 2 }
         return filtered.isEmpty ? sentences : filtered
     }
-}
-
-enum EPUBError: Error {
-    case invalidStructure(String)
 }

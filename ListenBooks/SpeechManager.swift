@@ -24,6 +24,9 @@ final class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelega
         didSet { updateAudioSessionCategory() }
     }
 
+    /// 语速（0.1 ~ 1.0）
+    var speechRate: Float = 0.45
+
     private override init() {
         super.init()
         synthesizer.delegate = self
@@ -157,7 +160,10 @@ final class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelega
         let lang = SpeechManager.detectLanguage(for: text)
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: lang)
-        utterance.rate = 0.45
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        if speechRate > 0 {
+            utterance.rate = speechRate
+        }
         utterance.pitchMultiplier = 1.0
         utterance.volume = 1.0
         currentUtterance = utterance
@@ -178,11 +184,13 @@ final class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelega
             currentSentence = ""
             currentUtterance = nil
         }
+        saveProgress()
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
         currentUtterance = utterance
         isSpeaking = true
+        saveProgress()
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
@@ -191,5 +199,14 @@ final class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelega
             currentSentence = ""
             currentUtterance = nil
         }
+        saveProgress()
+    }
+
+    /// 将当前章节/句子进度写入 BookStore 持久化
+    private func saveProgress() {
+        guard let bookURL = BookStore.shared.lastBookURL,
+              BookStore.shared.currentBook != nil else { return }
+        BookStore.shared.lastChapterIndex = currentChapterIndex
+        BookStore.shared.lastSentenceIndex = currentSentenceIndex
     }
 }

@@ -51,6 +51,8 @@ struct LibraryView: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("\(url.deletingPathExtension().lastPathComponent)，点击打开")
+                            .accessibilityHint("加载这本 EPUB 小说并开始听书")
                         }
                     }
                     .listStyle(.plain)
@@ -114,6 +116,8 @@ struct LibraryView: View {
                     self.selectedBookURL = nil // 重置，避免重复触发
                     // 通过环境对象或通知把 book 传给 ReaderView，这里用简单的全局共享
                     BookStore.shared.currentBook = book
+                    BookStore.shared.lastBookURL = url.path
+                    BookStore.shared.resetProgress()
                     // 由父级响应 navigation
                 }
             } catch {
@@ -141,9 +145,4 @@ struct LibraryView: View {
     }
 }
 
-/// 简单的全局书籍共享，用于 LibraryView 和 ReaderView 之间传递
-final class BookStore: ObservableObject {
-    static let shared = BookStore()
-    @Published var currentBook: Book?
-    private init() {}
-}
+

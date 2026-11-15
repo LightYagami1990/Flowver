@@ -15,7 +15,7 @@ final class VolumeKeyHandler: NSObject {
     var onVolumeUp: (() -> Void)?
     var onVolumeDown: (() -> Void)?
 
-    /// 固定音量（0~1），音量键按下后会被重置为这个值，从而实现“固定音量”的体验
+    /// 固定音量（0~1），音量键按下后会被重置回这个值，从而实现“固定音量”的体验
     var fixedVolume: Float = 0.5 {
         didSet { slider?.value = fixedVolume }
     }
@@ -33,20 +33,19 @@ final class VolumeKeyHandler: NSObject {
         guard let window = targetWindow else { return }
 
         window.addSubview(volumeView)
-            volumeView.frame = CGRect(x: -1000, y: -1000, width: 10, height: 10)
-            volumeView.isHidden = true
-            volumeView.showsRouteButton = false
-            volumeView.showsVolumeSlider = false
+        volumeView.frame = CGRect(x: -1000, y: -1000, width: 10, height: 10)
+        volumeView.isHidden = true
+        volumeView.showsRouteButton = false
+        volumeView.showsVolumeSlider = false
 
-            // 查找内部的 UISlider（系统音量滑块）
-            for view in volumeView.subviews where view is UISlider {
-                let s = view as! UISlider
-                self.slider = s
-                s.value = fixedVolume
-                lastVolume = s.value
-                s.addTarget(self, action: #selector(volumeSliderChanged(_:)), for: .valueChanged)
-                break
-            }
+        // 查找内部的 UISlider（系统音量滑块）
+        for view in volumeView.subviews where view is UISlider {
+            let s = view as! UISlider
+            self.slider = s
+            s.value = fixedVolume
+            lastVolume = s.value
+            s.addTarget(self, action: #selector(volumeSliderChanged(_:)), for: .valueChanged)
+            break
         }
     }
 
