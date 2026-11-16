@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 主入口：底部分栏，书库 + 当前听书 + 设置
+/// Main entry: bottom tabs — Library, Reader, Settings
 struct ContentView: View {
     @StateObject private var bookStore = BookStore.shared
 
@@ -9,29 +9,29 @@ struct ContentView: View {
             LibraryView()
                 .tabItem {
                     Image(systemName: "bookshelf.fill")
-                    Text("书库")
+                    Text("Library")
                 }
 
             ReaderView()
                 .tabItem {
                     Image(systemName: "speaker.wave.2.fill")
-                    Text("听书")
+                    Text("Listen")
                 }
 
             SettingsView()
                 .tabItem {
                     Image(systemName: "gearshape")
-                    Text("设置")
+                    Text("Settings")
                 }
         }
         .tint(.black)
         .onAppear {
-            // 启动时若有上次书籍路径，自动尝试恢复（在 ReaderView 内部也会处理）
+            // On launch, if there is a last book path, try to restore it (ReaderView also handles this)
             restoreLastBookIfNeeded()
         }
     }
 
-    /// 若当前无书且有上次路径，尝试重新解析并恢复
+    /// If no book currently and a last path exists, try to re-parse and restore
     private func restoreLastBookIfNeeded() {
         guard bookStore.currentBook == nil,
               let lastPath = bookStore.lastBookURL else { return }
@@ -44,7 +44,7 @@ struct ContentView: View {
                     bookStore.currentBook = book
                 }
             } catch {
-                print("Flowver: 恢复上次书籍失败 \(error)")
+                print("Flowver: Failed to restore last book \(error)")
             }
         }
     }

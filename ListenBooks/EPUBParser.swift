@@ -2,7 +2,7 @@ import Foundation
 import Fuzi
 import Zip
 
-/// EPUB 解析错误类型
+/// EPUB parsing error types
 enum EPUBError: Error, LocalizedError {
     case fileNotFound
     case unzipFailed(Error)
@@ -13,33 +13,33 @@ enum EPUBError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .fileNotFound:
-            return "EPUB 文件不存在"
+            return "EPUB file not found"
         case .unzipFailed(let error):
-            return "解压 EPUB 失败：\(error.localizedDescription)"
+            return "Failed to unzip EPUB: \(error.localizedDescription)"
         case .invalidStructure(let detail):
-            return "EPUB 结构无效：\(detail)"
+            return "Invalid EPUB structure: \(detail)"
         case .noChaptersFound:
-            return "未解析到任何章节"
+            return "No chapters found"
         case .encodingFailed:
-            return "文件编码读取失败"
+            return "Failed to read file encoding"
         }
     }
 }
 
-/// EPUB 解析器
-/// 功能：解压 EPUB、读取 container.xml / OPF、按 spine 顺序提取章节纯文本并切分句子
+/// EPUB parser
+/// Function: unzip EPUB, read container.xml / OPF, extract chapter plain text in spine order and split into sentences
 enum EPUBParser {
     static let shared = EPUBParser()
 
-    /// 从本地 EPUB 文件解析出 Book 模型
-    /// - Parameter epubURL: EPUB 文件路径
+    /// Parse a local EPUB file into a Book model
+    /// - Parameter epubURL: EPUB file path
     /// - Returns: Book
     func parse(epubURL: URL) throws -> Book {
         guard FileManager.default.fileExists(atPath: epubURL.path) else {
             throw EPUBError.fileNotFound
         }
 
-        // 1. 解压到缓存目录
+        // 1. Unzip to cache directory
         let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let safeName = epubURL.deletingPathExtension().lastPathComponent
             .replacingOccurrences(of: " ", with: "_")
@@ -53,10 +53,10 @@ enum EPUBParser {
             throw EPUBError.unzipFailed(error)
         }
 
-        // 2. 读取 META-INF/container.xml，找到 OPF 路径
+        // 2. Read META-INF/container.xml to find OPF path
         let containerURL = bookFolder.appendingPathComponent("META-INF/container.xml")
         guard FileManager.default.fileExists(atPath: containerURL.path) else {
-            throw EPUBError.invalidStructure("未找到 META-INF/container.xml")
+            throw EPUBError.invalidStructure("META-INF/container.xml not found")
         }
 
         let containerData: Data
@@ -70,16 +70,16 @@ enum EPUBParser {
         do {
             containerDoc = try XMLDocument(data: containerData)
         } catch {
-            throw EPUBError.invalidStructure("container.xml 解析失败")
+            throw EPUBError.invalidStructure("Failed to parse container.xml")
         }
 
         guard let rootfile = containerDoc.css("rootfile").first?.attr("full-path") else {
-            throw EPUBError.invalidStructure("未找到 rootfile")
+            throw EPUBError.invalidStructure("rootfile not found")
         }
 
         let opfURL = bookFolder.appendingPathComponent(rootfile)
         guard FileManager.default.fileExists(atPath: opfURL.path) else {
-            throw EPUBError.invalidStructure("OPF 文件不存在：\(rootfile)")
+            throw EPUBError.invalidStructure("OPF file not found: \(rootfile)")
         }
 
         let opfData: Data
@@ -93,19 +93,19 @@ enum EPUBParser {
         do {
             opfDoc = try XMLDocument(data: opfData)
         } catch {
-            throw EPUBError.invalidStructure("OPF 解析失败")
+            throw EPUBError.invalidStructure("Failed to parse OPF")
         }
 
-        // 基础目录（OPF 所在目录，用于解析相对路径）
+        // Base directory (directory containing the OPF, used to resolve relative paths)
         let baseURL = opfURL.deletingLastPathComponent()
 
-        // 3. 解析 metadata（title / creator）
+        // 3. Parse metadata (title / creator)
         let metadata = opfDoc.root.firstChild(tag: "metadata")
         let title = metadata?.children.first(where: { $0.tag == "dc:title" })?.stringValue
             ?? epubURL.deletingPathExtension().lastPathComponent
-        let author = metadata?.children.first(where: { $0.tag == "dc:creator" })?.stringValue ?? "未知作者"
+        let author = metadata?.children.first(where: { $0.tag == "dc:creator" })?.stringValue ?? "Unknown Author"
 
-        // 4. 解析 manifest，建立 id -> 路径 映射
+        // 4. Parse manifest, build id -> path mapping
         var manifest: [String: String] = [:]
         for item in opfDoc.css("manifest item") {
             if let id = item.attr("id"), let href = item.attr("href") {
@@ -113,7 +113,7 @@ enum EPUBParser {
             }
         }
 
-        // 5. 解析 spine，按顺序取出章节 id
+        // 5. Parse spine, take chapter ids in order
         var spineIDs: [String] = []
         for itemref in opfDoc.css("spine itemref") {
             if let idref = itemref.attr("idref") {
@@ -121,7 +121,7 @@ enum EPUBParser {
             }
         }
 
-        // 6. 依次解析每个章节 XHTML，提取纯文本并切分句子
+        // 6. Parse each chapter XHTML, extract plain text and split into sentences
         var chapters: [Chapter] = []
         for (index, id) in spineIDs.enumerated() {
             guard let relativePath = manifest[id] else { continue }
@@ -142,7 +142,7 @@ enum EPUBParser {
                 continue
             }
 
-            // 去掉 script / style
+            // Remove script / style
             for node in htmlDoc.css("script, style") {
                 node.removeFromParent()
             }
@@ -152,7 +152,7 @@ enum EPUBParser {
             let sentences = splitIntoSentences(rawText)
             guard !sentences.isEmpty else { continue }
 
-            let chapterTitle = "第 \(index + 1) 章"
+            let chapterTitle = "Chapter \(index + 1)"
             chapters.append(Chapter(title: chapterTitle, text: rawText, sentences: sentences))
         }
 
@@ -169,14 +169,14 @@ enum EPUBParser {
         )
     }
 
-    /// 简单按标点切分句子，支持中英日韩常见标点
+    /// Simple sentence splitting by punctuation, supports common Chinese/English/Japanese/Korean punctuation
     private func splitIntoSentences(_ text: String) -> [String] {
-        // 先把连续空白压缩
+        // Compress consecutive whitespace first
         let cleaned = text.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return [] }
 
-        // 切分正则：中英文句号、问号、感叹号、分号、换行等
+        // Splitting regex: Chinese/English period, question mark, exclamation mark, semicolon, newline etc.
         let pattern = #"([。！！？？\.!?;；\n\r]+)"#
         let regex: NSRegularExpression
         do {
@@ -206,7 +206,7 @@ enum EPUBParser {
             sentences.append(buffer.trimmingCharacters(in: .whitespacesAndNewlines))
         }
 
-        // 过滤过短的句子（少于 2 个字符通常是噪声），但保留至少一句
+        // Filter out too-short sentences (less than 2 characters usually noise), but keep at least one
         let filtered = sentences.filter { $0.count >= 2 }
         return filtered.isEmpty ? sentences : filtered
     }

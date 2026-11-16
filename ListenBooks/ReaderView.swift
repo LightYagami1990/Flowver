@@ -1,7 +1,7 @@
 import SwiftUI
 import AVFoundation
 
-/// 阅读器：护眼背景 + 黑色文字，以听为主，音量键控制上一句/下一句
+/// Reader: eye-care background + black text, listening-first, volume keys control previous/next sentence
 struct ReaderView: View {
     @StateObject private var speech = SpeechManager.shared
     @StateObject private var bookStore = BookStore.shared
@@ -11,7 +11,7 @@ struct ReaderView: View {
     @State private var showingSettings = false
     @State private var isRestoring = false
 
-    // 护眼背景色（米黄），黑色文字
+    // Eye-care background color (cream), black text
     private let bgColor = Color(red: 0.97, green: 0.95, blue: 0.88)
 
     var body: some View {
@@ -22,14 +22,14 @@ struct ReaderView: View {
                 content(for: book)
             } else if isRestoring {
                 VStack {
-                    ProgressView("恢复上次阅读进度…")
+                    ProgressView("Restoring last progress…")
                         .foregroundColor(.black)
                 }
             } else {
                 ContentUnavailableView(
-                    "未选择书籍",
+                    "No Book Selected",
                     systemImage: "book",
-                    description: Text("请在书库中选择一本 EPUB 小说")
+                    description: Text("Please select an EPUB novel from the library")
                 )
             }
         }
@@ -51,22 +51,22 @@ struct ReaderView: View {
     @ViewBuilder
     private func content(for book: Book) -> some View {
         VStack(spacing: 0) {
-            // 顶部信息栏 + 设置入口
+            // Top info bar + settings entry
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(book.title)
                         .font(.title2.bold())
                         .foregroundColor(.black)
-                        .accessibilityLabel("书名：\(book.title)")
+                        .accessibilityLabel("Title: \(book.title)")
                     Text(book.author)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                        .accessibilityLabel("作者：\(book.author)")
-                    let progress = "第 \(speech.currentChapterIndex + 1) 章 · 第 \(speech.currentSentenceIndex + 1) 句"
+                        .accessibilityLabel("Author: \(book.author)")
+                    let progress = "Chapter \(speech.currentChapterIndex + 1) · Sentence \(speech.currentSentenceIndex + 1)"
                     Text(progress)
                         .font(.caption)
                         .foregroundColor(.secondary)
-                        .accessibilityLabel("当前进度：\(progress)")
+                        .accessibilityLabel("Progress: \(progress)")
                 }
                 Spacer()
                 Button {
@@ -76,8 +76,8 @@ struct ReaderView: View {
                         .font(.title2)
                         .foregroundColor(.black)
                 }
-                .accessibilityLabel("设置")
-                .accessibilityHint("调整语言、语速和音量")
+                .accessibilityLabel("Settings")
+                .accessibilityHint("Adjust language, speech rate, and volume")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 24)
@@ -85,14 +85,14 @@ struct ReaderView: View {
 
             Spacer(minLength: 10)
 
-            // 正文：当前句子
+            // Main text: current sentence
             if speech.currentSentence.isEmpty {
-                Text("准备就绪，点击播放开始听书")
+                Text("Ready. Tap play to start listening")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, 24)
-                    .accessibilityLabel("准备就绪，点击播放按钮开始听书")
+                    .accessibilityLabel("Ready. Tap the play button to start listening")
             } else {
                 ScrollView {
                     Text(speech.currentSentence)
@@ -102,13 +102,13 @@ struct ReaderView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 4)
-                        .accessibilityLabel("当前句子：\(speech.currentSentence)")
+                        .accessibilityLabel("Current sentence: \(speech.currentSentence)")
                 }
             }
 
             Spacer(minLength: 10)
 
-            // 操作栏
+            // Control bar
             VStack(spacing: 14) {
                 HStack(spacing: 20) {
                     Button {
@@ -119,8 +119,8 @@ struct ReaderView: View {
                             .foregroundColor(.black)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("上一句")
-                    .accessibilityHint("音量减键同样可以上一句")
+                    .accessibilityLabel("Previous sentence")
+                    .accessibilityHint("Volume down key also goes to previous sentence")
 
                     Button {
                         togglePlay(book: book)
@@ -130,8 +130,8 @@ struct ReaderView: View {
                             .foregroundColor(.black)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(speech.isSpeaking ? "暂停" : "播放")
-                    .accessibilityHint("点击暂停或继续朗读当前句子")
+                    .accessibilityLabel(speech.isSpeaking ? "Pause" : "Play")
+                    .accessibilityHint("Tap to pause or continue reading the current sentence")
 
                     Button {
                         speech.nextSentence(book: bookStore.currentBook!)
@@ -141,14 +141,14 @@ struct ReaderView: View {
                             .foregroundColor(.black)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("下一句")
-                    .accessibilityHint("音量加键同样可以下一句")
+                    .accessibilityLabel("Next sentence")
+                    .accessibilityHint("Volume up key also goes to next sentence")
                 }
 
-                Text("音量键：上一句 / 下一句  ·  锁屏后可用锁屏媒体控制")
+                Text("Volume keys: Previous / Next sentence  ·  Lock screen media controls also work")
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .accessibilityLabel("音量键控制上一句下一句，锁屏后使用系统媒体控制")
+                    .accessibilityLabel("Volume keys control previous and next sentence; lock screen media controls also work")
             }
             .padding(.bottom, 30)
         }
@@ -164,7 +164,7 @@ struct ReaderView: View {
         }
     }
 
-    /// 启动时尝试恢复上次阅读进度
+    /// On launch, try to restore last reading progress
     private func restoreProgressIfNeeded() {
         guard let book = bookStore.currentBook,
               let lastURL = bookStore.lastBookURL,
@@ -196,14 +196,9 @@ struct ReaderView: View {
         volume.onVolumeUp = nil
         volume.onVolumeDown = nil
     }
-
-    /// 进度持久化：每当章节或句子切换时保存
-    private func observeProgress() {
-        // 通过 onReceive 监听 speech 的章节/句子变化，写入 BookStore
-    }
 }
 
-/// 章节选择器（极简，仅供跳转章节用）
+/// Chapter picker (minimal, for chapter jumping only)
 struct ChapterPickerView: View {
     @StateObject private var bookStore = BookStore.shared
     @Environment(\.dismiss) private var dismiss
@@ -223,8 +218,8 @@ struct ChapterPickerView: View {
                                 Text(book.chapters[index].title)
                                     .font(.body)
                                     .foregroundColor(.black)
-                                    .accessibilityLabel("\(book.chapters[index].title)，共 \(book.chapters[index].sentences.count) 句")
-                                Text("\(book.chapters[index].sentences.count) 句")
+                                    .accessibilityLabel("\(book.chapters[index].title), \(book.chapters[index].sentences.count) sentences")
+                                Text("\(book.chapters[index].sentences.count) sentences")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -232,13 +227,13 @@ struct ChapterPickerView: View {
                         .buttonStyle(.plain)
                     }
                 } else {
-                    ContentUnavailableView("无书籍", systemImage: "book")
+                    ContentUnavailableView("No Books", systemImage: "book")
                 }
             }
-            .navigationTitle("选择章节")
+            .navigationTitle("Select Chapter")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完成") { dismiss() }
+                    Button("Done") { dismiss() }
                 }
             }
         }

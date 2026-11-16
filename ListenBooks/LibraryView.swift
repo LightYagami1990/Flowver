@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-/// 书库：列出 Documents/Books 下的 EPUB 文件，支持点击打开、导入
+/// Library: lists EPUB files under Documents/Books, supports tap to open and import
 struct LibraryView: View {
     @State private var books: [URL] = []
     @State private var showingImporter = false
@@ -24,9 +24,9 @@ struct LibraryView: View {
             Group {
                 if books.isEmpty {
                     ContentUnavailableView(
-                        "暂无书籍",
+                        "No Books",
                         systemImage: "book.closed",
-                        description: Text("请将 EPUB 文件拷贝到 “\(booksDirectory.path)” 目录，或点击下方“导入”按钮添加。")
+                        description: Text("Copy EPUB files to “\(booksDirectory.path)” or tap “+” below to import.")
                     )
                 } else {
                     List {
@@ -51,14 +51,14 @@ struct LibraryView: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
-                            .accessibilityLabel("\(url.deletingPathExtension().lastPathComponent)，点击打开")
-                            .accessibilityHint("加载这本 EPUB 小说并开始听书")
+                            .accessibilityLabel("\(url.deletingPathExtension().lastPathComponent), tap to open")
+                            .accessibilityHint("Load this EPUB novel and start listening")
                         }
                     }
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("书库")
+            .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -66,6 +66,7 @@ struct LibraryView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Import book")
                 }
             }
             .fileImporter(
@@ -83,8 +84,8 @@ struct LibraryView: View {
             .onAppear {
                 reloadBooks()
             }
-            .alert("加载失败", isPresented: .constant(loadError != nil)) {
-                Button("知道了") { loadError = nil }
+            .alert("Import Failed", isPresented: .constant(loadError != nil)) {
+                Button("OK") { loadError = nil }
             } message: {
                 Text(loadError ?? "")
             }
@@ -113,12 +114,10 @@ struct LibraryView: View {
                 let book = try EPUBParser.shared.parse(epubURL: url)
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    self.selectedBookURL = nil // 重置，避免重复触发
-                    // 通过环境对象或通知把 book 传给 ReaderView，这里用简单的全局共享
+                    self.selectedBookURL = nil // reset to avoid re-trigger
                     BookStore.shared.currentBook = book
                     BookStore.shared.lastBookURL = url.path
                     BookStore.shared.resetProgress()
-                    // 由父级响应 navigation
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -144,5 +143,3 @@ struct LibraryView: View {
         }
     }
 }
-
-

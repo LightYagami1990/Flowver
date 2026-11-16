@@ -1,138 +1,138 @@
 # Flowver
 
-让阅读重新变得简单，让声音陪你走进文字的世界。
+Make reading simple again. Let voice take you into the world of words.
 
-Flowver 是一款为 iOS 设计的极简 EPUB 听书 App。核心愿景是：在这个高速信息化的社会里，越来越多人被碎片信息裹挟，静不下心读完一本书。Flowver 以降低阅读门槛为出发点，帮助用户培养阅读习惯，同时让盲人、低视力人群及阅读障碍者也能平等地享受书本带来的乐趣与知识。
-
----
-
-## 为什么做 Flowver
-
-- **让阅读更简单**：不需要拿着纸书，不需要盯着屏幕逐字阅读。把 EPUB 小说导入，一键播放，让声音陪你读完每一段。
-- **培养阅读习惯**：极简操作、无复杂设置，把“打开就听”作为默认体验，帮助用户把听书变成日常习惯，再慢慢回归文字阅读。
-- **服务特殊群体**：盲人、弱视人群、阅读障碍者等，往往难以获得便捷的数字阅读渠道。Flowver 以“听”为主，配合系统语音和无障碍适配，让他们也能独立享受书本。
+Flowver is a minimal EPUB audiobook app designed for iOS. Our core mission: in this fast-paced, information-overloaded society, more and more people find it hard to sit down and finish a book. Flowver lowers the barrier to reading, helps users build a reading habit, and enables the blind, low-vision, and people with reading disabilities to equally enjoy the pleasure and knowledge of books.
 
 ---
 
-## 核心特性
+## Why Flowver
 
-### 1. 音量键翻页（固定音量）
-在固定系统音量的前提下，设备侧边的音量键不再调节音量，而是直接映射为：
-- **音量 + → 下一句**
-- **音量 - → 上一句**
-
-音量会自动重置回固定值，不会改变系统音量。你无需看屏幕，无需解锁手机，单手即可流畅地控制小说的前后句，非常适合盲人用户、弱视用户，以及任何希望在走路、做家事、闭目养神时听书的场景。
-
-### 2. 锁屏后台播放 + 锁屏媒体控制
-- 支持 `UIBackgroundModes = audio`，锁屏后语音继续播放，不会被系统挂起。
-- 配合 `MPRemoteCommandCenter`，锁屏界面的“上一首 / 下一首 / 播放 / 暂停”按钮映射为小说的**上一句 / 下一句 / 暂停 / 继续**，盲人用户无需解锁即可操作。
-
-### 3. 阅读进度自动保存
-离开 App 或锁屏后，下次打开会自动恢复到上次读到的章节和句子，无需从头开始。
-
-### 4. EPUB 支持
-导入本地 EPUB 文件，自动解析章节并按句子切分，适配系统语音逐句播放。
-
-### 5. 系统语音合成（多语言支持）
-调用苹果 `AVSpeechSynthesizer`，根据文本自动识别语言并切换合成语音，支持：
-- **中文（zh-CN）**
-- **英文（en-US）**
-- **日语（ja-JP）**
-- **韩语（ko-KR）**
-
-在设置页可手动固定语言、调节语速（0.1 ~ 1.0）和固定音量（10% ~ 100%）。
-
-### 6. 护眼极简 UI
-背景采用护眼米黄，文字纯黑，大行间距，UI 参考苹果自带图书。没有字体颜色、字号、主题等无关调整，只保留播放/暂停、章节进度、句子文本，让注意力集中在内容本身。
-
-### 7. 无障碍适配（VoiceOver）
-所有按钮和文本区域均添加了 `accessibilityLabel` 和 `accessibilityHint`，配合系统 VoiceOver，视障用户可独立操作 App。
+- **Make reading simpler**: No need to hold a paper book, no need to stare at the screen word by word. Import an EPUB novel, tap play, and let voice read every paragraph to you.
+- **Build a reading habit**: Extremely simple operation, no complex settings. “Open and listen” is the default experience, helping users turn listening into a daily habit, and gradually return to reading text.
+- **Serve special groups**: The blind, low-vision users, and people with reading disabilities often lack accessible digital reading channels. Flowver is listening-first, paired with system speech synthesis, so they can enjoy books independently.
 
 ---
 
-## 项目结构
+## Core Features
+
+### 1. Volume Key Page Turning (Fixed Volume)
+With system volume fixed, the device’s side volume keys no longer adjust volume, but are mapped to:
+- **Volume Up → Next sentence**
+- **Volume Down → Previous sentence**
+
+Volume automatically resets to the fixed value and does not change system volume. You don’t need to look at the screen or unlock your phone — one hand is enough to smoothly control the previous and next sentence of the novel. Ideal for blind users, low-vision users, and anyone who wants to listen while walking, doing housework, or resting with eyes closed.
+
+### 2. Lock Screen Background Playback + Lock Screen Media Controls
+- Supports `UIBackgroundModes = audio`, so speech continues playing when the screen is locked and is not suspended by the system.
+- Integrated with `MPRemoteCommandCenter`; the lock screen “Previous / Next / Play / Pause” media buttons are mapped to the novel’s **Previous Sentence / Next Sentence / Pause / Continue**, so blind users can operate without unlocking the phone.
+
+### 3. Reading Progress Auto-Save
+When you leave the app or lock the screen, the next time you open it, it automatically restores to the last chapter and sentence you were at — no need to start over.
+
+### 4. EPUB Support
+Import local EPUB files; chapters are automatically parsed and split into sentences for system speech synthesis sentence-by-sentence playback.
+
+### 5. System Speech Synthesis (Multi-language Support)
+Uses Apple’s `AVSpeechSynthesizer`, automatically detecting the language of the text and switching the synthesis voice, supporting:
+- **English (en-US)**
+- **Chinese (zh-CN)**
+- **Japanese (ja-JP)**
+- **Korean (ko-KR)**
+
+In Settings, you can manually fix the language, adjust speech rate (0.1 ~ 1.0), and set fixed volume (10% ~ 100%).
+
+### 6. Eye-Care Minimal UI
+Background is eye-care cream, text is pure black, with generous line spacing. UI references Apple Books. No font color, font size, or theme adjustments — only play/pause, chapter progress, and sentence text are kept, so attention stays on the content.
+
+### 7. Accessibility (VoiceOver)
+All buttons and text areas have `accessibilityLabel` and `accessibilityHint` added. Paired with system VoiceOver, visually impaired users can operate the app independently.
+
+---
+
+## Project Structure
 
 ```
 Flowver/
-├── Package.swift                # Swift Package 依赖说明（可选，Xcode 也可直接拖入源码）
+├── Package.swift                # Swift Package dependency description (optional; Xcode can also drag in sources directly)
 ├── .gitignore
-├── LICENSE                      # MIT 协议
-├── CONTRIBUTING.md              # 贡献指南
+├── LICENSE                      # MIT License
+├── CONTRIBUTING.md              # Contribution guide
 ├── README.md
-├── Info.plist.example           # Info.plist 参考（需复制到 Xcode 项目并配置）
-└── ListenBooks/                 # 源码目录（保留历史目录名，不影响编译）
-    ├── App.swift                # @main 入口（FlowverApp）
-    ├── ContentView.swift        # 底部分栏（书库 / 听书 / 设置）
-    ├── LibraryView.swift        # 书库：列出 Documents/Books 下的 EPUB，支持导入
-    ├── ReaderView.swift         # 听书器：护眼背景、句子文本、播放控制、无障碍标签
-    ├── SettingsView.swift       # 最小设置页：语言、语速、音量、关于
-    ├── ChapterPickerView.swift  # 章节跳转
-    ├── Book.swift               # 数据模型
-    ├── BookStore.swift          # 全书共享 + 阅读进度持久化（UserDefaults）
-    ├── EPUBParser.swift         # EPUB 解压 + OPF/NCX/XHTML 解析 + 句子切分 + 错误处理
-    ├── SpeechManager.swift      # AVSpeechSynthesizer 封装（多语言自动检测 + 锁屏媒体控制 + 进度保存）
-    └── VolumeKeyHandler.swift   # 音量键拦截（固定音量 + 翻页映射）
+├── Info.plist.example           # Info.plist reference (copy into Xcode project and configure)
+└── ListenBooks/                 # Source directory (retains historical directory name, does not affect compilation)
+    ├── App.swift                # @main entry (FlowverApp)
+    ├── ContentView.swift        # Bottom tabs (Library / Listen / Settings)
+    ├── LibraryView.swift        # Library: lists EPUBs under Documents/Books, supports import
+    ├── ReaderView.swift         # Reader: eye-care background, sentence text, playback control, accessibility labels
+    ├── SettingsView.swift       # Minimal settings: language, speech rate, volume, about
+    ├── ChapterPickerView.swift  # Chapter jumping
+    ├── Book.swift               # Data model
+    ├── BookStore.swift          # Global book sharing + reading progress persistence (UserDefaults)
+    ├── EPUBParser.swift         # EPUB unzip + OPF/NCX/XHTML parsing + sentence splitting + error handling
+    ├── SpeechManager.swift      # AVSpeechSynthesizer wrapper (multi-language auto-detect + lock screen media control + progress saving)
+    └── VolumeKeyHandler.swift   # Volume key interception (fixed volume + page-turn mapping)
 ```
 
 ---
 
-## 依赖库（Swift Package Manager）
+## Dependencies (Swift Package Manager)
 
-- [Zip](https://github.com/marmelroy/Zip)：解压 EPUB
-- [Fuzi](https://github.com/cezheng/Fuzi)：轻量 XML/HTML 解析（读取 OPF、XHTML 并提取纯文本）
+- [Zip](https://github.com/marmelroy/Zip): unzip EPUB
+- [Fuzi](https://github.com/cezheng/Fuzi): lightweight XML/HTML parser (reads OPF, XHTML and extracts plain text)
 
 ---
 
-## 如何编译运行（需要 Mac + Xcode）
+## How to Build and Run (Requires Mac + Xcode)
 
-Flowver 是原生 iOS Swift 源码，**不能在 iPhone 或 iPad 上直接编译**，请在 Mac 上按以下步骤操作：
+Flowver is native iOS Swift source code, **cannot be compiled directly on iPhone or iPad**. Please follow these steps on a Mac:
 
-1. 在 Mac 上打开 Xcode，新建项目 → **App** → Interface: **SwiftUI** → Life Cycle: **SwiftUI** → Language: **Swift**。
-2. 把 `ListenBooks/` 目录下所有 `.swift` 文件拖入 Xcode 项目（勾选 "Copy items if needed"）。
-3. 在 Xcode 中添加 Swift Package 依赖：
+1. On Mac, open Xcode, create a new project → **App** → Interface: **SwiftUI** → Life Cycle: **SwiftUI** → Language: **Swift**.
+2. Drag all `.swift` files under `ListenBooks/` into the Xcode project (check "Copy items if needed").
+3. Add Swift Package dependencies in Xcode:
    - File → Add Packages…
-   - 输入 `https://github.com/marmelroy/Zip.git`
-   - 输入 `https://github.com/cezheng/Fuzi.git`
-4. 复制 `Info.plist.example` 为项目的 `Info.plist`，或在 Xcode 的 Info 面板中手动添加：
-   - `UIBackgroundModes` → `App plays audio`（必须，否则锁屏后语音会中断）
+   - Enter `https://github.com/marmelroy/Zip.git`
+   - Enter `https://github.com/cezheng/Fuzi.git`
+4. Copy `Info.plist.example` to your project’s `Info.plist`, or manually add in Xcode’s Info panel:
+   - `UIBackgroundModes` → `App plays audio` (required, otherwise speech stops when the screen is locked)
    - `CFBundleDisplayName` → `Flowver`
-5. 按 `Cmd + R` 运行到连接的 iPhone 或模拟器。
+5. Press `Cmd + R` to run on a connected iPhone or simulator.
 
-> 注意：目前代码尚未在真机上编译通过，如遇到编译错误，欢迎在 GitHub Issues 中反馈或直接提交 Pull Request。
-
----
-
-## 如何添加书籍
-
-1. 将 EPUB 文件拷贝到 App 的 `Documents/Books` 目录；
-2. 或在 App 内点击书库右上角 **＋** 使用系统文件选择器导入 EPUB。
+> Note: The code has not yet been verified on a real device. If you encounter compilation errors, feel free to report them in GitHub Issues or submit a Pull Request directly.
 
 ---
 
-## 音量键原理说明（简要）
+## How to Add Books
 
-`VolumeKeyHandler` 向窗口添加一个不可见的 `MPVolumeView`，观察系统音量 `UISlider` 的值变化。用户按侧边音量键时，App 捕获后立即将音量重置回固定值（默认 50%），并映射为：
-- 音量变大 → 下一句
-- 音量变小 → 上一句
-
-这属于基于公开 API 的交互技巧，不涉及越狱或私有 API。
+1. Copy EPUB files to the app’s `Documents/Books` directory;
+2. Or tap the **+** button in the top-right of the library screen to import EPUB via the system file picker.
 
 ---
 
-## 开源与协议
+## Volume Key Principle (Brief)
 
-本项目采用 **MIT 协议** 开源，欢迎 fork、修改和贡献。
+`VolumeKeyHandler` adds an invisible `MPVolumeView` to the window and observes the system volume `UISlider` value changes. When the user presses the side volume keys, the app captures the change, immediately resets the volume to the fixed value (default 50%), and maps it to:
+- Volume up → Next sentence
+- Volume down → Previous sentence
 
-如果你有 Mac 环境，可以直接编译运行；如果你希望在 GitHub 上查看或参与，代码已开源在：  
+This is an interaction technique based on public APIs; it does not involve jailbreaking or private APIs.
+
+---
+
+## Open Source & License
+
+This project is open sourced under the **MIT License**, welcome to fork, modify, and contribute.
+
+If you have a Mac environment, you can compile and run it directly. If you want to view or participate on GitHub, the code is open at:  
 🔗 https://github.com/LightYagami1990/Flowver
 
 ---
 
-## 未来方向（保持极简）
+## Future Roadmap (Stay Minimal)
 
-- 暂不增加文字颜色、字号、主题切换等设置，坚持“听为主”的初衷。
-- 如需上架 App Store，需自行处理隐私政策、文件导入 entitlements 及审核指南。
+- No font color, font size, or theme switching will be added for now, staying true to “listening first”.
+- To publish on the App Store, you will need to handle privacy policy, file import entitlements, and review guidelines yourself.
 
 ---
 
-> Flowver，愿每一个想静下心来阅读的人，都能找到属于自己的节奏。
+> Flowver, may everyone who wants to slow down and read find their own rhythm.

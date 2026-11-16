@@ -60,7 +60,7 @@ final class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelega
         if (0xAC00...0xD7AF).contains(value) || (0x1100...0x11FF).contains(value) {
             return "ko-KR"
         }
-        // 默认英文
+        // Default to English
         return "en-US"
     }
 

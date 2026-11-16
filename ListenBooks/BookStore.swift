@@ -21,7 +21,7 @@ final class BookStore: ObservableObject {
         didSet { save() }
     }
     /// 用户偏好语言（持久化）
-    @Published var preferredLanguage: String = "zh-CN" {
+    @Published var preferredLanguage: String = "en-US" {
         didSet { save() }
     }
     /// 语速（0.1 ~ 1.0，持久化）
